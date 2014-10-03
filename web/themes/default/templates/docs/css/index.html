@@ -1,0 +1,133 @@
+<article class="post">
+	<header>
+		<hgroup>
+			<h1>Example HTML markup to highlight defined styles</h1>
+		</hgroup>
+	</header>
+	<section>
+		<h2>Summary</h2>
+		<p>I thought it would be helpful for me to have a page that showcased the available CSS. So I built this page to show the expected HTML for the CSS that's written. View the source on this page so you can see an example of the intended HTML markup that goes with the CSS.</p>
+		<h2>Styled HTML Elements</h2>
+		<p>The styled elements are headers, lists, blockquotes, tables, code, iframes, videos, footers, pagination, links, and tooltips.</p>
+		<h3>Headers</h3>
+		<div>
+			<h1>H1</h1>
+			<h2>H2</h2>
+			<h3>H3</h3>
+			<h4>H4</h4>
+			<h5>H5</h5>
+			<h6>H6</h6>
+		</div>
+		<h3>Lists</h3>
+		<p>There are 3 types of lists that are styled.</p>
+		<h4>Unordered</h4>
+		<ul>
+			<li>Apples</li>
+			<li>Oranges</li>
+			<li>Pears</li>
+			<li>Lemons</li>
+			<li>Strawberrys</li>
+		</ul>
+		<h4>Ordered</h4>
+		<ol>
+			<li>Preheat oven to 400 °F</li>
+			<li>Cover the Salmon in Oil</li>
+			<li>Bake for 13 minutes</li>
+		</ol>
+		<h4>Data</h4>
+		<dl>
+			<dt>Marvel Heroes</dt>
+			<dd>Hulk</dd>
+			<dd>Iron Man</dd>
+			<dd>Thor</dd>
+			<dd>Spider-Man</dd>
+			<dd>Captain America</dd>
+			<dd>Black Widow</dd>
+		</dl>
+		<h3>Blockquote with Cite</h3>
+		<blockquote>
+			<p>A good plan violently executed now is better than a perfect plan executed next week.</p>
+			<small>George S. Patton</small>
+			<cite><a href="/">citation</a></cite>
+		</blockquote>
+		<h3>Code</h3>
+		<pre>
+			<code>
+				function execute(){
+					for(var i = 0; i < list.length; i++) console.log(i);
+				}
+			</code>
+		</pre>
+		<h3>Keystrokes</h3>
+		<kbd>ctrl-v</kbd>
+		<h3>Tables with a Caption and Table in a Cell</h3>
+		<table>
+			<caption>This is an example table with Caption</caption>
+			<thead>
+				<tr>
+					<th>Column 1</th>
+					<th>Column 2</th>
+					<th>Column 3</th>
+					<th>Column 4</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>1</td>
+					<td>2</td>
+					<td>3</td>
+					<td>
+						<table>
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Age</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Test Name</td>
+									<td>32</td>
+								</tr>
+							</tbody>
+							<tfoot>
+							</tfoot>
+						</table>
+					</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="2"><small>Table Footer</small></td>
+				</tr>
+			</tfoot>
+		</table>
+		<h3>IFrame</h3>
+		<iframe src="http://joeyguerra.com" width="300" height="300"></iframe>
+		<h3>Video</h3>
+		<video id="CTPmediaElement3" class="fluid-width-video-wrapper" controls="" preload="auto" autoplay="" src="http://gamestop.brightcove.com.edgesuite.net/694940074001/201401/3152/694940074001_3099822304001_Tomb-Raider--NA---Definitive-Edition-Launch-Trailer.mp4" poster="http://gamestop.brightcove.com.edgesuite.net/694940074001/2014/01/694940074001_3099822294001_vs-52e25c07e4b06d4a55b1dc9d-672293880001.jpg?pubId=694940074001" style="width: 610px !important; height: 343px !important;"></video>
+	</section>
+	<footer>
+		<h2>Time in the footer section</h2>
+		<time datetime="<%= new Date() %>"><%= new Date() %></time>
+	</footer>
+</article>
+<article class="post">
+	<header>
+		<hgroup>
+			<h1 class="post-title"><a href="/">Article</a></h1>
+		</hgroup>
+		<hgroup class="post-meta">
+			<time class="publish-date"><%= new Date() %></time>
+		</hgroup>
+	</header>
+	<section>
+		<div class="post-excerpt">
+			<p>Post excerpt. A short summary of the article to be used in post lists.</p>
+		</div>
+		<p>This is markup for a full article.</p>
+	</section>
+	<footer class="user-meta">
+		<a href="/">link to author's site</a>
+	</footer>
+</article>

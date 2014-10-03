@@ -1,0 +1,17 @@
+<channel>
+	<title><%- resource.title %></title>
+	<description><%- resource.description %></description>
+	<link>http://blog.joeyguerra.com/index.rss</link>
+	<lastBuildDate><%- new Date(resource.posts.lastBuildDate)%></lastBuildDate>
+	<pubDate><%- new Date(resource.posts.lastBuildDate)%></pubDate>
+	<ttl>1800</ttl>
+	<% resource.posts.forEach(function(post){%>
+	<item>
+		<title><%- post.title%></title>
+		<description><%- post.summary %></description>
+		<link><%- post.slug %></link>
+		<guid><%- post.key %></guid>
+		<pubDate><%- new Date(post.time)%></pubDate>
+	</item>
+	<%})%>
+</channel>

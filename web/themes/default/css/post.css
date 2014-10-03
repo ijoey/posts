@@ -1,0 +1,6 @@
+html, body{
+  height: 100%;
+}
+input, textarea{
+	width: 100%;
+}

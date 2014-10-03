@@ -26,3 +26,13 @@ node_modules
 
 # Users Environment Variables
 .lock-wscript
+
+*.env
+
+config.js
+
+*.db
+
+data
+web/subscribers
+*.min.*

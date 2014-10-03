@@ -1,0 +1,11 @@
+<article class="blog-post" itemscope itemtype="http://schema.org/Article">
+	<header class="blog-header">
+		<h2 itemprop="name" class="blog-post-title"><%= model.title %></h2>
+		<div class="blog-post-meta">
+			Published on <time datetime="<%= model.w3cFormat(model.published) %>" itemprop="datePublished"><%= model.humanFriendlyDate(new Date(model.published)) %></time>.
+		</div>
+	</header>
+	<section itemprop="articleBody">
+		<%- model.content %>
+	</section>
+</article>

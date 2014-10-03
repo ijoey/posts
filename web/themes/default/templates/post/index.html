@@ -1,0 +1,21 @@
+<% model.forEach(function(post){%>
+	<article class="post" data-id="<%= post._id %>" itemscope itemtype="http://schema.org/Article">
+		<header>
+			<h1><a href="/<%= post.slug %>" title="<%= post.title %>" itemprop="url"><span itemprop="name"><%= post.title %></span></a></h1>
+			<time datetime="<%= post.w3cFormat(post.published) %>" itemprop="datePublished"><%= post.humanFriendlyDate(new Date(post.published)) %></time>
+			<form method="get" action="/post/<%= post._id %>">
+				<button type="submit">Edit</button>
+			</form>
+			<form method="post">
+				<input type="hidden" name="_id" value="<%= post._id%>" />
+				<input type="hidden" name="_method" value="delete" />
+				<button type="submit">Delete</button>
+			</form>
+		</header>
+		<section itemprop="articleBody">
+			<%- post.content %>
+		</section>
+		<footer>
+		</footer>
+	</article>
+<%})%>

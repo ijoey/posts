@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+	<head>
+	    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+		<title><%- config.site.title %><%- resource.title ? ": " + resource.title : null %></title>
+		<meta name="description" content="<%= resource.description %>" />
+		<meta name="author" content="<%= resource.author %>" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="translucent black" />
+		<meta name="apple-mobile-web-app-title" content="<%- config.site.title %>">
+		<link rel="icon" type="image/png" href="/public/images/apple-touch-icon.png" />
+		<link rel="apple-touch-startup-image" href="/public/images/startup.png" />
+		<link rel="apple-touch-icon" href="/public/images/apple-touch-icon.png" />
+		<link rel="apple-touch-icon" href="/public/images/apple-touch-icon-ipad.png" sizes="72x72" />
+		<link rel="apple-touch-icon" href="/public/images/apple-touch-icon-iphone4.png" sizes="114x114" />
+		<link rel="alternate" type="application/rss+xml" title="<%- config.site.title %>" href="/index.rss">
+		<link type="text/plain" rel="author" href="/humans.txt" />
+		<link rel="stylesheet" type="text/css" href="/public/bootstrap/css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="/public/css/default.css" />
+		<% resource.css.forEach(function(style){%><link rel="stylesheet" type="text/css" href="/public/css/<%- style %>.css" /><%}) %>
+		<!--<script type="text/javascript" src="/socket.io/socket.io.js" async></script>-->
+	</head>
+	<body class="blog <%= resource.bodyClassName %>">
+		<header class="blog-masthead" role="banner">
+			<h1 class="logo"><a href="/" title="Home Page on <%- config.site.title %>"><%- config.site.title %></a></h1>
+		</header>
+		<main class="container" role="main">
+			<div class="row">
+				<div class="col-sm-8 blog-main">
+					<%- output %>
+				</div>
+				<aside class="col-sm-3 col-sm-offset-1 blog-sidebar">
+					<div class="sidebar-module sidebar-module-inset profile">
+						<h4>About Joey</h4>
+						<img class="photo" src="//www.gravatar.com/avatar/4f25413ef954673484dd5b3a1964702d.png" alt="Joey Guerra">
+						<p>Joey Guerra is a Software Engineer near Dallas, Texas. Actively using insights to conceive, model and scale a solution to a problem.</p>
+					</div>
+					<div class="sidebar-module">
+						<h4>Articles <span class="badge"><%= resource.posts.length %></span></h4>
+						<nav itemscope itemtype="http://schema.org/Article">
+							<ol class="articles">
+							<% resource.posts.forEach(function(post){%>
+								<li>
+									<a href="/<%- post.slug %>" title="<%= post.title%>" itemprop="url">
+										<span itemprop="name"><%= post.title%></span>
+									</a>
+								</li>
+							<%})%>
+							</ol>
+						</nav>
+						<nav class="sidebar-module" role="navigation">
+							<h4>Social Networks</h4>
+							<ol class="articles">
+								<li>
+									<a href="http://www.linkedin.com/in/joeyguerra" target="_blank" title="linkedin" class="icon">LinkedIn</a>
+								</li>
+								<li>
+									<a href="https://github.com/ijoey" target="_blank" title="github" class="icon">GitHub</a>
+								</li>
+								<li>
+									<a href="https://twitter.com/ijoeyguerra" target="_blank" title="twitter" class="icon">Twitter</a>
+								</li>
+							</ol>
+						</nav>
+					</div>
+				</aside>
+			</div>
+		</main>
+	    <footer class="blog-footer">
+			<% if(!request.user){%>
+			<form data-rel="signin" method="get" action="/auth/twitter" name="signinwithtwitter">
+				<button type="submit">Sign in with Twitter</button>
+			</form>
+			<%}%>
+	        <a class="subscribe icon-feed" href="/index.rss"><span class="tooltip">Subscribe!</span></a>
+	        <div class="inner">
+	             <section class="copyright">
+					 <h4>All content copyright <a href="/"><%= config.site.title %></a> &copy; <%= (new Date()).getFullYear() %> &bull; All rights reserved.</h4>
+				 </section>
+	             <section class="poweredby">
+					 <h4>Proudly powered by a computer, code, and beer!</h4>
+				 </section>
+	        </div>
+	    </footer>
+		<script src="/public/js/mvc.js"></script>
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script type="text/javascript" src="/public/bootstrap/js/bootstrap.min.js"></script>
+		<% if(request.headers.host === 'blog.joeyguerra.com'){%>
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		  ga('create', 'UA-26060958-5', 'joeyguerra.com');
+		  ga('send', 'pageview');
+		</script>
+		<%}%>
+		<% resource.js.forEach(function(script){%><script type="text/javascript" src="/public/js/<%= script %>.js"></script><%}) %>
+	</body>
+</html>

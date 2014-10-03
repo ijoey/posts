@@ -1,0 +1,16 @@
+<form data-rel="<%= model._id ? 'edit' : 'add'%>-item" method="post" action="<%= request.url %>">
+	<fieldset>
+		<legend></legend>
+		<% if(model._id){%>
+			<input type="hidden" name="_method" value="put" />
+		<%}%>
+		<input type="text" name="title" placeholder="Title" value="<%= model.title %>" />
+		<textarea placeholder="Content" name="content"><%- model.content %></textarea>
+	</fieldset>
+	<fieldset>
+		<legend>Post Meta</legend>
+		<input type="datetime-local" value="<%- new Date(model.published) %>" name="published" />
+	</fieldset>
+	<button tpe="submit">Save</button>
+</form>
+<script src="/public/js/post.js"></script>

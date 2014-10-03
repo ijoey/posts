@@ -1,0 +1,9 @@
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	<% model.forEach(function(post){%>
+	<url>
+		<loc>http://blog.joeyguerra.com/<%- post.slug %></loc>
+		<lastmod><%= post.w3cFormat(post.published) %></lastmod>
+		<priority>0.8</priority>
+	</url>
+	<%})%>
+</urlset>

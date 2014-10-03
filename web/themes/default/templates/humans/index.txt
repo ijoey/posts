@@ -1,0 +1,8 @@
+/* TEAM */
+Programmer: Joey Guerra
+Email: contact [at] joeyguerra.com
+twiiter: @ijoeyguerra
+From: Dallas, TX, USA
+
+/* TECH */
+Javascript, Node JS, HTML, CSS		

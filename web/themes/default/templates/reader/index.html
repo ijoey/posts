@@ -1,0 +1,536 @@
+<style>
+	#sidebar{
+		position: fixed;
+		top:0;
+		left: 0;
+		width: 300px;
+		border-right: 1px solid #dbdbdb;
+		background: #eee;
+	}
+	#sidebar a{
+		display: block;
+		height: 2em;
+		line-height: 2em;
+		width: 100%;
+		border-bottom: solid 1px #d2d2d2;
+		text-indent: 1em;
+		overflow: hidden;
+	}
+	#mainArea{
+		margin-left: 300px;
+		padding-left: 2em;
+	}
+	nav a{
+		display: block;
+	}
+	img{
+		max-width: 100%;
+	}
+	article{
+		position: relative;
+		border: 1px solid #dbdbdb;
+		border-width: 0 0 1px;
+		box-shadow: 0 1px 1px 0 rgba(0,0,0,0.07);
+		padding: 30px 0;
+	}
+	#addView{
+		display: none;
+	}
+	.selected{
+		background: black;
+		color: white;
+	}
+	.blog-footer, .blog-sidebar{
+		display: none;
+	}
+</style>
+<section id="sidebar">
+	<h4>Feeds</h4>
+	<nav id="feeds"></nav>
+	<footer>
+		<div id="addView">
+			<form>
+				<fieldset>
+					<input type="text" name="newFeedUrl" placeholder="Url" />
+				</fieldset>
+			</form>
+		</div>
+		<button id="addButton">Add</button>
+	</footer>
+</section>
+<section id="mainArea">
+	<h4>WillRead</h4>
+</section>
+<script>
+	var my = {lib: {}, View: {}, Controller: {}, Observable: {}, List: {}};
+	my.lib.Xml = (function(){
+		function parseText (sValue) {
+		  if (/^\s*$/.test(sValue)) { return null; }
+		  if (/^(?:true|false)$/i.test(sValue)) { return sValue.toLowerCase() === "true"; }
+		  if (isFinite(sValue)) { return parseFloat(sValue); }
+		  if (isFinite(Date.parse(sValue))) { return new Date(sValue); }
+		  return sValue;
+		}
+		function getJXONTree (oXMLParent) {
+		  var vResult = true, nLength = 0, sCollectedTxt = "";
+		  if (oXMLParent.hasAttributes()) {
+		    vResult = {};
+		    for (nLength; nLength < oXMLParent.attributes.length; nLength++) {
+		      oAttrib = oXMLParent.attributes.item(nLength);
+		      vResult["@" + oAttrib.name.toLowerCase()] = parseText(oAttrib.value.trim());
+		    }
+		  }
+		  if (oXMLParent.hasChildNodes()) {
+		    for (var oNode, sProp, vContent, nItem = 0; nItem < oXMLParent.childNodes.length; nItem++) {
+		      oNode = oXMLParent.childNodes.item(nItem);
+		      if (oNode.nodeType === 4) { sCollectedTxt += oNode.nodeValue; }
+		      else if (oNode.nodeType === 3) { sCollectedTxt += oNode.nodeValue.trim(); }
+		      else if (oNode.nodeType === 1 && !oNode.prefix) {
+		        if (nLength === 0) { vResult = {}; }
+		        sProp = oNode.nodeName.toLowerCase();
+		        vContent = getJXONTree(oNode);
+		        if (vResult.hasOwnProperty(sProp)) {
+		          if (vResult[sProp].constructor !== Array) { vResult[sProp] = [vResult[sProp]]; }
+		          vResult[sProp].push(vContent);
+		        } else { vResult[sProp] = vContent; nLength++; }
+		      }
+		    }
+		  }
+		  if (sCollectedTxt) { nLength > 0 ? vResult.keyValue = parseText(sCollectedTxt) : vResult = parseText(sCollectedTxt); }
+		  return vResult;
+		}
+		var obj = {
+			toJson: getJXONTree
+		};
+		return obj;
+	})();
+
+	my.Observable = function(){
+		var observers = {};
+		var self = {
+			observe: function(key, observer){
+				if(observers[key] === undefined) observers[key] = [];
+				observers[key].push(observer);
+			}
+			, stopObserving: function(observer){
+				for(var key in observers){
+					var i = 0;
+					var ubounds = observers[key].length;				
+					for(i; i < ubounds; i++){
+						if(observers[key][i] === observer){
+							observers[key].splice(i, 1);
+							if(observers[key].length === 0) delete observers[key];
+							break;
+						}
+					}
+				}
+			}
+			, changed: function(key, old, v){
+				if(observers[key] === undefined){
+					return;
+				}
+				var i = 0;
+				var ubounds = observers[key].length;
+				for(i; i<ubounds; i++){
+					observers[key][i](key, old, v, this);
+				}
+			}
+			, release: function(){
+				var key = null;
+				for(key in observers){
+					var observer = null;
+					while(observer = observers[key].pop()){}			
+				}
+			}
+		};
+		return self;
+	};
+	my.List = function(list){
+		var innerList = list || [];
+		var self = my.Observable();
+		Object.defineProperty(self, 'length', {
+			get: function(){
+				return innerList.length;
+			}
+			, enumerable: true
+		});
+		Object.defineProperty(self, 'all', {
+			get: function(){
+				return innerList;
+			}
+			, enumerable: true
+		});
+		self.push = function(feed){
+			innerList.push(feed);
+			this.changed('push', null, feed);
+		};
+		self.find = function(delegate){
+			var i = 0;
+			var ubounds = innerList.length;
+			for(i; i < ubounds; i++){
+				if(delegate(i, innerList[i])){
+					return innerList[i];
+				}
+			}
+			return null;
+		};
+		self.remove = function(delegate){
+			var i = 0;
+			var ubounds = innerList.length;
+			var deleted = [];
+			for(i; i < ubounds; i++){
+				if(delegate(innerList[i])){
+					deleted = innerList.splice(i, 1);
+					this.changed('remove', deleted[0], i);
+					break;
+				}
+			}
+			return deleted[0];
+		};
+		return self;
+	};
+	my.View = function(container, controller){
+		var self = {
+			container: container
+			, controller: controller
+			, views: []
+			, release: function release(){
+				if(!this.container.parentNode){
+					return null;
+				}
+				this.container.parentNode.removeChild(this.container);
+				this.controller.release();
+				var view = null;
+				while(view = this.views.pop()) view.release();
+			}
+			, clear: function(){
+				while (this.container.lastChild) {
+				  this.container.removeChild(this.container.lastChild);
+				}
+			}
+		};
+		Object.defineProperty(self, 'isHidden', {
+			get: function(){
+				return this.container.style.display === 'none';
+			}
+			, enumerable: true
+		});
+		self.controller.setView(self);
+		return self;
+	};
+	my.Controller = function(delegate, model){
+		var self = {
+			model: model
+			, delegate: delegate
+			, release: function release(){}
+			, view: null
+		};
+		self.setView = function(v){
+			this.view = v;
+			if(this.didSetView) this.didSetView(v);
+		};
+		self.release = function(){
+			if(model.release) model.release();
+		};
+		return self;
+	};
+	my.Feed = function(obj){
+		var self = my.Observable();
+		function getLink(obj){
+			var href = null;
+			if(obj.channel){
+				href = {
+					href: obj.channel.link
+				};
+				return href;
+			}
+
+			if(obj.link.forEach){
+				var link = null;
+				while(link = obj.link.pop()){
+					if(link['@type'] === 'text/html'){
+						href = {href: link['@href']};
+						return href;
+					}
+				}
+			}
+			href = {
+				href: "No link found"
+			};
+			return href;
+		}
+		function getEntries(obj){
+			var entries = [];
+			if(obj.channel){
+				obj.channel.item.forEach(function(item){
+					entries.push({author: {name: null}, content: {type: 'html', keyValue: item.description, id: item.link, title: item.title, published: item.pubdate, hero: item.enclosure ? item.enclosure['@url'] : null}});
+				});
+			}else{
+				obj.entry.forEach(function(item){
+					var div = document.createElement('div');
+					div.innerHTML = item.content.keyValue;
+					var hero = div.querySelector('img');
+					entries.push({author: {name: item.author.name}, content: {type: item.content['@type'], keyValue: item.content.keyValue, id: item.id, title: item.title.keyValue ? item.title.keyValue : item.title, published: item.published}, hero: hero ? hero.src : null});
+				});
+			}
+			return entries;
+		}
+		function getIcon(obj){
+			return obj.icon || null;
+		}
+		function getTitle(obj){
+			if(obj.channel){
+				return obj.channel.title;
+			}
+			if(obj.title.keyValue){
+				return obj.title.keyValue;
+			}
+			return obj.title;
+		}
+		if(obj){
+			self.link = getLink(obj);
+			self.entries = getEntries(obj);
+			self.icon = getIcon(obj);
+			self.title = getTitle(obj);
+			self.url = obj.url;
+		}
+		return self;
+	};
+	my.List.Feed = function(){
+		var self = my.List();
+		var active = null;
+		Object.defineProperty(self, 'active', {
+			get: function(){
+				return active;
+			}
+			, set: function(v){
+				var old = active;
+				active = v;
+				this.changed('active', old, v, this);
+			}
+		});
+		return self;
+	};
+	my.View.Feeds = function(container, controller){
+		var self = my.View(container, controller);
+		function addLink(feed){
+			var a = document.createElement('a');				
+			a.href = feed.link.href;
+			a.title = feed.title;
+			a.innerHTML = feed.title;
+			self.container.appendChild(a);
+		}
+		self.added = function(key, old, v, m){				
+			addLink(v);
+		};
+		self.shouldSelect = function(target){
+			var links = this.container.querySelectorAll('a');
+			for(var i = 0; i < links.length; i++){
+				links[i].className = '';
+				if(links[i] === target) links[i].className = 'selected';
+			}
+		};
+		self.removed = function(key, old, v, m){
+			var elem = self.container.querySelector('[title="' + old.title + '"]');
+			self.container.removeChild(elem);
+		};
+		controller.model.observe('push', self.added);
+		controller.model.observe('remove', self.removed);
+		return self;
+	};
+	my.View.Column = function(container, controller){
+		var self = my.View(container, controller);
+		return self;
+	};
+	my.Controller.Column = function(delegate, model){
+		var self = my.Controller(delegate, model);
+		function resize(height){
+			self.view.container.style['height'] = height + 'px';
+		}
+		function getViewportHeight(){
+			return Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+		}
+		function getViewportWidth(){
+			return Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+		}
+		self.handleEvent = function(e){
+			if(getViewportWidth() <= 400) return null;
+			resize(getViewportHeight());
+		};
+		self.didSetView = function(v){
+			window.addEventListener('resize', self, true);
+			resize(getViewportHeight());
+		};
+		return self;
+	};
+	my.Controller.Feeds = function(delegate, model){
+		var self = my.Controller(delegate, model);
+		self.handleEvent = function(e){
+			e.preventDefault();
+			if(e.target.nodeName !== 'A') return null;
+			delegate.feedLinkWasClicked(e.target);
+			this.view.shouldSelect(e.target);
+		};
+		self.didSetView = function(v){
+			this.view.container.addEventListener('click', this, true);
+		};
+		return self;
+	};
+
+	my.View.ActiveFeed = function(container, controller){
+		var self = my.View(container, controller);
+		self.activeWasUpdated = function(key, old, v, m){
+			self.clear();
+			v.entries.forEach(function(entry){
+				var article = document.createElement('article');
+				var header = document.createElement('header');
+				var h1 = document.createElement('h1');
+				var div = document.createElement('div');
+				h1.innerHTML = '<a href="{href}">{title}</a>'.replace(/\{href\}/, entry.content.id).replace(/\{title\}/, entry.content.title);
+				div.innerHTML = entry.content.keyValue;
+				header.appendChild(h1);
+				article.appendChild(header);
+				article.appendChild(div);
+				self.container.appendChild(article);
+			});
+		};
+		controller.model.observe('active', self.activeWasUpdated);
+		return self;
+	};
+	my.Controller.ActiveFeed = function(delegate, model){
+		var self = my.Controller(delegate, model);
+		return self;
+	};
+	my.View.AddButton = function(container, controller){
+		var self = my.View(container, controller);
+		Object.defineProperty(self, 'text', {
+			get: function(){ return this.container.innerHTML;}
+			, set: function(v){this.container.innerHTML = v;}
+			, enumerable: true
+		});
+		return self;
+	};
+	my.Controller.AddButton = function(delegate, model){
+		var self = my.Controller(delegate, model);
+		var feed = my.Feed();
+		self.handleEvent = function(e){
+			this.delegate.addButtonWasClicked(this);
+		};
+		self.didSetView = function(v){
+			this.view.container.addEventListener('click', self, true);
+		};
+		return self;
+	};
+	my.View.AddView = function(container, controller){
+		var self = my.View(container, controller);
+		var urlField = self.container.querySelector('input');
+		self.container.id = 'addView';
+		self.show = function(){
+			this.container.style.display = 'block';
+		};
+		self.hide = function(){
+			this.container.style.display = 'none';
+		};
+		Object.defineProperty(self, 'url', {
+			get: function(){ return urlField.value;}
+			, set: function(v){
+				urlField.value = v;
+			}
+			, enumerable: true
+		});
+		return self;
+	};
+	my.Controller.AddView = function(delegate, model){
+		var self = my.Controller(delegate, model);
+		self.handleEvent = function(e){
+			e.preventDefault();
+			if(this.view.url.length === 0) return;
+			this.model = this.view.url;
+			this.delegate.newFeedWasSubmitted(this.model);
+			this.view.url = '';
+		};
+		self.didSetView = function(v){
+			this.view.container.querySelector('form').addEventListener('submit', this, true);
+		};
+		return self;
+	};
+	var model = my.List.Feed();
+	model.active = null;
+	var favoriteFeeds = function(){
+		return model;
+	};
+	var app = {
+		requestDidLoad: function(e){
+			console.log('loaded', e);
+		}
+		, handleEvent: function(e){
+			if(e.target.readyState !== 4) return;
+			if(e.target.status === 200){
+				var i = 0;
+				var root = e.target.responseXML.childNodes[i];
+				while(!root.hasAttributes && i < 10) root = e.target.responseXML.childNodes[i++];
+				var feed = my.lib.Xml.toJson(root);
+				feed.url = e.target.responseXML.URL;
+				model.push(my.Feed(feed));
+			}
+		}
+		, errorDidHappen: function(e){
+			console.log('error', e);
+		}
+		, feedLinkWasClicked: function(link){
+			model.active = model.find(function(i, feed){
+				return feed.title === link.title;
+			});
+			window.document.title = model.active.title;
+			window.scrollTo(0,0);
+		}
+		, addButtonWasClicked: function(controller){
+			var addView = this.views.filter(function(v){
+				return v.container.id === 'addView';
+			})[0];
+			var addButton = this.views.filter(function(v){
+				return v.container.id === 'addButton';
+			})[0];
+			if(addView.isHidden){
+				addButton.text = 'Done';
+				addView.show();
+			}else{
+				addButton.text = 'Add';
+				addView.hide();
+			}
+		}
+		, newFeedWasSubmitted: function(url){
+			addFeed(url, this);
+		}
+		, feedWasAdded: function(key, old, v, m){
+			var urls = JSON.parse(localStorage.willRead);
+			if(urls.some(function(url){return url === v.url})) return;
+			urls.push(v.url);
+			localStorage.willRead = JSON.stringify(urls);
+		}
+		, feedWasRemoved: function(key, old, v, m){
+			var urls = JSON.parse(localStorage.willRead);
+			var newUrls = urls.filter(function(url){
+				return url !== old.url;
+			});
+			localStorage.willRead = JSON.stringify(newUrls);
+		}
+		, views: []
+	};
+	model.observe('push', app.feedWasAdded);
+	model.observe('remove', app.feedWasRemoved);		
+	var addFeed = function(url, handler){
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener('readystatechange', handler);
+		xhr.open('get', url, true);
+		xhr.send();
+	};
+	app.views.push(my.View.Column(document.getElementById('sidebar'), my.Controller.Column(app, model)));
+	app.views.push(my.View.Feeds(document.getElementById('feeds'), my.Controller.Feeds(app, model)));
+	app.views.push(my.View.ActiveFeed(document.getElementById('mainArea'), my.Controller.ActiveFeed(app, model)));
+	app.views.push(my.View.AddButton(document.getElementById('addButton'), my.Controller.AddButton(app, model)));
+	app.views.push(my.View.AddView(document.getElementById('addView'), my.Controller.AddView(app, model)));
+	var urls = [];
+	if(localStorage.willRead) urls = JSON.parse(localStorage.willRead);
+	urls.forEach(function(url){addFeed(url, app);});
+</script>
