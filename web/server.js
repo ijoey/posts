@@ -19,6 +19,8 @@ var Editor = require(rootPath + '/blog/entities/editor');
 var Persistence = require('../boundaries/persistence')(config);
 var postPath = __dirname + '/data/posts/';
 var DateParser = require('../dateParser');
+var Marked = require('marked');
+
 function Resource(obj){
 	for(var key in obj) this[key] = obj[key];
 }
@@ -87,7 +89,7 @@ passport.use(new TwitterStrategy({
 			if(member) return done(null, member);
 			var memberDb = new Datastore({filename: membersDbFilePath, autoload: true});
 			var editor = Editor({
-				token: profile.id
+				token: token
 				, name: profile.displayName
 				, avatar: profile._json.profile_background_image_url
 				, username: profile.username
