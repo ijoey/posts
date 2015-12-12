@@ -163,18 +163,11 @@ app.get('/', function(req, resp, next){
 });
 
 // authenticated endpoints
-app.get('/posts.:format?', function(req, resp, next){
+app.get(['/posts.:format?', "/post.:format?", "/post/:title"], function(req, resp, next){
 	if(!req.isAuthenticated()) return next(401);
 	next();
 });
-app.get("/post.:format?", function(req, resp, next){
-	if(!req.isAuthenticated()) return next(401);
-	next();
-});
-app.get("/post/:title", function(req, resp, next){
-	if(!req.isAuthenticated()) return next(401);
-	next();
-});
+
 app.post("/post.:format?", function(req, resp, next){
 	if(!req.isAuthenticated()) return next(401);
 	next();
@@ -292,7 +285,7 @@ app.get("/:slug.:format?", function (request, response, next){
 				return next(500);
 			}
 			post = new Post(JSON.parse(data));
-			response.represent({view: 'post/show', resource: new Resource({title: post.title, posts: posts}), model: post});
+			response.represent({view: 'post/show', resource: new Resource({title: post.title, description: post.excerpt(255), author: post.author.name, posts: posts}), model: post});
 		});
 	})
 });

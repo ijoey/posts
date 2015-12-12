@@ -12,7 +12,7 @@ var Post = function Post(obj){
 		}
 		, enumerable: true
 	});
-	
+
 	var content = null;
 	Object.defineProperty(this, 'content', {
 		get: function(){return content;}
@@ -23,7 +23,7 @@ var Post = function Post(obj){
 		}
 		, enumerable: true
 	});
-	
+
 	var author = null;
 	Object.defineProperty(this, 'author', {
 		get: function(){return author;}
@@ -34,7 +34,7 @@ var Post = function Post(obj){
 		}
 		, enumerable: true
 	});
-	
+
 	var published = null;
 	Object.defineProperty(this, 'published', {
 		get: function(){return published;}
@@ -45,13 +45,13 @@ var Post = function Post(obj){
 		}
 		, enumerable: true
 	});
-	
+
 	var slug = null;
 	Object.defineProperty(this, 'slug', {
 		get: function(){return title !== null ? title.toLowerCase().replace(/[^0-9a-zA-Z]+/ig, '-') : null;}
 		, enumerable: true
 	});
-	
+
 	var time = (new Date()).getTime();
 	Object.defineProperty(this, 'time', {
 		get: function(){return time;}
@@ -80,7 +80,7 @@ Post.prototype = {
 		return moment.utc(date).format();
 	}
 	, excerpt: function(length){
-		var excerpt = String(this.html).replace(/<\/?[^>]+>/gi, '');
+		var excerpt = String(this.content).replace(/<\/?[^>]+>/gi, '');
 	    excerpt = excerpt.replace(/(\r\n|\n|\r)+/gm, ' ');
 		var words = excerpt.split(' ');
 		while(words.length > length) words.pop();
