@@ -317,10 +317,7 @@ app.use(function(err, req, res, next){
 	var status = new HttpStatus(typeof err != 'number' ? 404 : err);
 	res.send(status.message);
 });
-process.argv.forEach(function(value, fileName, args){
-	if(/as:/.test(value)) config.runAsUser = /as\:([a-zA-Z-]+)/.exec(value)[1];
-	if(/port:/.test(value)) config.port = /port:(\d+)/.exec(value)[1];
-});
+
 process.on('exit', function() {
 	console.log('web server exited.');
 });
@@ -333,7 +330,7 @@ process.on('SIGINT', function(){
 	process.exit(1);
 });
 
-var Server = app.listen(config.port, function(){
+var Server = app.listen(process.env.PORT, function(){
 	console.log('Server started, on port ', Server.address().port);
 });
 

@@ -9,7 +9,7 @@
     "url": "https://github.com/ijoey/joeyguerra.git"
   },
   "scripts": {
-    "start": "nodemon web/posts.js",
+    "start": "PORT=5000 nodemon web/posts.js",
     "test": "node test/*.js",
     "dev": "DEBUG=* nodemon web/posts.js"
   },
