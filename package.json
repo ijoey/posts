@@ -11,7 +11,7 @@
   "scripts": {
     "start": "nodemon web/posts.js",
     "test": "node test/*.js",
-	"dev": "DEBUG=* nodemon web/posts.js"
+    "dev": "DEBUG=* nodemon web/posts.js"
   },
   "engines": {
     "node": ">=0.10.21",
@@ -27,6 +27,7 @@
     "cookie-session": "*",
     "ejs": "*",
     "express": "*",
+    "git-rev": "^0.2.1",
     "jws": "*",
     "marked": "^0.3.2",
     "method-override": "*",
