@@ -35,5 +35,4 @@ config.js
 
 data
 web/subscribers
-*.min.*
 *.tar.gz
