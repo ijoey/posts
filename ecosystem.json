@@ -10,11 +10,10 @@
       name      : "posts",
       script    : "web/posts.js",
       env: {
-        COMMON_VARIABLE: "true"
+        PORT: "49152"
       },
       env_production : {
         NODE_ENV: "production",
-        PORT: "49152"
       }
     },
   ],
