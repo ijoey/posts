@@ -17,7 +17,7 @@ var membersDbFilePath = config.dataPath + '/members.db';
 var signer = require('jws');
 var Editor = require(rootPath + '/blog/entities/editor');
 var Persistence = require('../boundaries/persistence')(config);
-var postPath = __dirname + '/data/posts/';
+var postPath = config.dataPath + '/posts/';
 var DateParser = require('../dateParser');
 var Marked = require('marked');
 
