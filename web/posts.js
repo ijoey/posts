@@ -135,7 +135,7 @@ app.get("/sitemap.:format", function(req, resp, next){
 
 app.get('/index:format?', function(req, resp, next){
 	var post = new Post();
-	fs.readFile(__dirname + '/data/index.json', null, function(err, data){
+	fs.readFile(config.dataPath + '/posts/index.json', null, function(err, data){
 		if(err) console.log(err);
 		post = new Post(JSON.parse(data));
 		resp.represent({view: 'index/index'
@@ -147,7 +147,7 @@ app.get('/index:format?', function(req, resp, next){
 });
 app.get('/', function(req, resp, next){
 	var post = null;
-	fs.readFile(__dirname + '/data/index.json', null, function(err, data){
+	fs.readFile(config.dataPath + '/posts/index.json', null, function(err, data){
 		if(err){
 			console.log(err);
 			return next(404);
