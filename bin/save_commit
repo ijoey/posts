@@ -1,0 +1,9 @@
+#!/usr/local/bin/node
+var git = require('git-rev');
+var fs = require("fs");
+var path = __dirname + '/';
+git.short(function (commit) {
+  fs.writeFile(path + "current_commit", commit, 'utf8', function(){
+    console.log('current_commit file saved with', commit);
+  });
+});

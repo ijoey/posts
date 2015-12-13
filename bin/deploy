@@ -1,0 +1,51 @@
+#!/bin/sh
+#$1 = branch
+#$2 = environment, development | qa | production.
+node bin/save_commit
+echo $@
+VERSION=`date -u +%Y%m%dT%H%M%SZ`
+BRANCH=$1
+USERNAME="hubot"
+PORT=3000
+ENV="development"
+HOST="localhost"
+if [ -n $2 ]
+  then
+  ENV=$2
+fi
+PRIVATE_KEY_PATH=~/.ssh/id_rsa
+
+case $ENV in
+  qa )
+    HOST="blog.joeyguerra.com";;
+  production )
+    HOST="blog.joeyguerra.com";;
+  *)
+    HOST="localhost";;
+esac
+echo "Deploying to $ENV : $HOST"
+ROOT_PATH="/home/hubot"
+APP_NAME="posts_$VERSION"
+NODE_PATH="/usr/local/bin/node"
+
+git archive --format=tar $BRANCH -o $APP_NAME.tar
+npm install
+tar -rf $APP_NAME.tar node_modules/
+tar -rf $APP_NAME.tar current_commit
+gzip -q $APP_NAME.tar
+
+scp -i $PRIVATE_KEY_PATH $APP_NAME.tar.gz $USERNAME@$HOST:$ROOT_PATH
+ssh -i $PRIVATE_KEY_PATH -t $USERNAME@$HOST bash -c "'
+cd $ROOT_PATH/
+pwd
+tar -xf $ROOT_PATH/$APP_NAME.tar.gz
+#cat ./www.pid
+#while read line; do kill -2 \"\$line\"; done < ./www.pid
+nohup bash -c \"PORT=$PORT NODE_ENV=$ENV exec -a $APP_NAME $NODE_PATH web/posts\" > www.log 2>&1&
+pgrep -f \"$APP_NAME web/posts\" > ./www.pid
+'"
+
+echo "Deleting package."
+ssh -i $PRIVATE_KEY_PATH -t $USERNAME@$HOST "rm $ROOT_PATH/$APP_NAME.tar.gz"
+rm $APP_NAME.tar.gz
+echo " * Deployment is done"
