@@ -380,7 +380,7 @@ function PostRequest(query){
 }
 function synchMostRecentPost(){
 	Persistence.post.findMostRecentlyPublished({published: {"$lt":(new Date()).getTime()}}, function(err, post){
-		fs.writeFile(__dirname + '/data/index.json', JSON.stringify(post), function(err){
+		fs.writeFile(config.dataPath + '/posts/index.json', JSON.stringify(post), function(err){
 			if(err) console.log(err);
 		});
 	});
@@ -393,7 +393,7 @@ function postSyncher(){
 	Persistence.post.findPublished(function(err, docs){
 		posts = [];
 		docs.forEach(function(doc){
-			fs.writeFile(rootPath + '/web/data/posts/' + doc.slug + '.json', JSON.stringify(doc), function(err){
+			fs.writeFile(config.dataPath + '/posts/' + doc.slug + '.json', JSON.stringify(doc), function(err){
 				if(err) console.log(err);
 			});
 			posts.push(new Post(doc));
