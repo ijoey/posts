@@ -9,7 +9,7 @@
 	<item>
 		<title><%- post.title%></title>
 		<description><%- post.summary %></description>
-		<link><%- post.slug %></link>
+		<link>http://blog.joeyguerra.com/<%- post.slug %></link>
 		<guid><%- post.key %></guid>
 		<pubDate><%- new Date(post.time)%></pubDate>
 	</item>
